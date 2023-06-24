@@ -62,7 +62,7 @@ static ssize_t reader_module_write(struct file *file, const char __user *buffer_
 static struct file_operations fops = {
     .write = reader_module_write,
 };
-
+/************************************************/
 int set_permission(int major_number){
     inode = get_inode(major_number);
     if (!inode) {
@@ -88,8 +88,9 @@ static int __init reader_module_init(void){
         printk(KERN_ALERT "Failed to register character device\n");
         return -EFAULT;
     }else{
-        inode = get_inode(major_number);
 	printk("New device created with Major Number: %d\n",major_number);
+	ret=set_permission(major_number);
+	if(ret < 0){ return -1;}
     }
 
     // Start the reader thread
