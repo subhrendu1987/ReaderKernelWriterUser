@@ -2,127 +2,122 @@
 #include <linux/module.h>
 #include <linux/kernel.h>
 #include <linux/fs.h>
-#include <linux/slab.h>
 #include <linux/uaccess.h>
-#include <linux/delay.h>
+#include <linux/slab.h>
+#include <linux/vmalloc.h>
 #include <linux/kthread.h>
-#include <linux/mutex.h>
-
+#include <linux/delay.h>
 
 #define BUFFER_SIZE 1024
-static const char *MODULE_FILE_NAME = "reader_module";
-static const char *MODULE_FILE_LOC = "/dev/reader_module";
 
-static char* buffer;
-static struct kstat stat;
-
-DEFINE_MUTEX(buffer_mutex);
-
+static char *buffer;
 static struct task_struct *reader_thread;
 
-static int read_buffer(void *data) {
-    while (!kthread_should_stop()) {
-        mutex_lock(&buffer_mutex);
+static int reader_func(void *data)
+{
+    while (!kthread_should_stop())
+    {
+        // Check if buffer has data
+        if (buffer != NULL)
+        {
+            // Read from buffer
+            char local_buffer[BUFFER_SIZE];
+            memset(local_buffer, 0, BUFFER_SIZE);
+            strncpy(local_buffer, buffer, BUFFER_SIZE);
 
-        // Read from the buffer
-        printk(KERN_INFO "Reader: Buffer contents: %s\n", buffer);
+            // Print the read data
+            printk(KERN_INFO "Data read from buffer: %s\n", local_buffer);
 
-        // Reset the buffer after reading
-        memset(buffer, 0, BUFFER_SIZE);
+            // Reset the buffer
+            kfree(buffer);
+            buffer = NULL;
+        }
 
-        mutex_unlock(&buffer_mutex);
-
-        // Sleep for some time before checking again
+        // Sleep for some time before checking the buffer again
         msleep(1000);
     }
 
     return 0;
 }
 
-int check_char_dev(char* filename){
-    // Check if the device is created or not
-    if (vfs_stat(filename, &stat) == 0) {
-        printk(KERN_INFO "%s exists\n",filename);
-        return -1;
-    } else {
-        printk(KERN_INFO "%s does not exist\n",filename);
-        return 0;
-    }
-}
-
-ssize_t write_buffer(struct file *file, const char __user *user_buffer, size_t count, loff_t *ppos) {
-    ssize_t bytes_written = 0;
-
-    if (mutex_lock_interruptible(&buffer_mutex)) {
-        return -ERESTARTSYS;
+static ssize_t reader_module_write(struct file *file, const char __user *buffer_user, size_t count, loff_t *ppos)
+{
+    // Allocate memory for the buffer
+    if (buffer == NULL)
+    {
+        buffer = kmalloc(BUFFER_SIZE, GFP_KERNEL);
+        if (buffer == NULL)
+        {
+            printk(KERN_ALERT "Failed to allocate memory for buffer\n");
+            return -ENOMEM;
+        }
     }
 
-    // Copy data from the user space to the buffer
-    if (copy_from_user(buffer, user_buffer, count) != 0) {
-        mutex_unlock(&buffer_mutex);
+    // Clear the buffer
+    memset(buffer, 0, BUFFER_SIZE);
+
+    // Copy the data from user space to kernel space
+    if (copy_from_user(buffer, buffer_user, count) != 0)
+    {
+        printk(KERN_ALERT "Failed to copy data from user space\n");
         return -EFAULT;
     }
 
-    mutex_unlock(&buffer_mutex);
-
-    bytes_written = count;
-    return bytes_written;
+    return count;
 }
 
-static const struct file_operations buffer_fops = {
-    .write = write_buffer,
+static struct file_operations fops = {
+    .write = reader_module_write,
 };
 
-static int __init buffer_module_init(void) {
-    int ret = 0;
-
-    buffer = kmalloc(BUFFER_SIZE, GFP_KERNEL);
-    if (!buffer) {
-        printk(KERN_ALERT "Failed to allocate buffer memory\n");
-        return -ENOMEM;
+static int __init reader_module_init(void)
+{
+    // Create a character device for reader module
+    if (register_chrdev(0, "reader_module", &fops) < 0)
+    {
+        printk(KERN_ALERT "Failed to register character device\n");
+        return -EFAULT;
     }
 
-    memset(buffer, 0, BUFFER_SIZE);
-
-    ret = register_chrdev(0, MODULE_FILE_NAME, &buffer_fops);
-    if (ret < 0) {
-        kfree(buffer);
-        printk(KERN_ALERT "Failed to register reader module\n");
-        return ret;
-    }else{
-        printk(KERN_ALERT "Reader module Created %s",MODULE_FILE_LOC);
-    }
-    ret=check_char_dev(MODULE_FILE_LOC);
-    if(ret <0){ return ret; }
-    
-
-    reader_thread = kthread_run(read_buffer, NULL, "reader_thread");
-    if (IS_ERR(reader_thread)) {
-        unregister_chrdev(0, MODULE_FILE_NAME);
-        kfree(buffer);
+    // Start the reader thread
+    reader_thread = kthread_run(reader_func, NULL, "reader_reader");
+    if (IS_ERR(reader_thread))
+    {
         printk(KERN_ALERT "Failed to create reader thread\n");
+        unregister_chrdev(0, "reader_module");
         return PTR_ERR(reader_thread);
     }
-    
-    printk(KERN_INFO "reader module loaded\n");
+
+    printk(KERN_INFO "Reader module initialized\n");
     return 0;
 }
 
-static void __exit buffer_module_exit(void) {
-    if (reader_thread) {
+static void __exit reader_module_exit(void)
+{
+    // Stop the reader thread
+    if (reader_thread != NULL)
+    {
         kthread_stop(reader_thread);
+        reader_thread = NULL;
     }
 
-    unregister_chrdev(0, MODULE_FILE_NAME);
-    kfree(buffer);
+    // Unregister the character device
+    unregister_chrdev(0, "reader_module");
 
-    printk(KERN_INFO "Buffer module unloaded\n");
+    // Free the buffer memory
+    if (buffer != NULL)
+    {
+        kfree(buffer);
+        buffer = NULL;
+    }
+
+    printk(KERN_INFO "Reader module exited\n");
 }
 
-module_init(buffer_module_init);
-module_exit(buffer_module_exit);
+module_init(reader_module_init);
+module_exit(reader_module_exit);
 
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Subhrendu Chattopadhyay");
-MODULE_DESCRIPTION("Kernel module for periodically checking and reading from a buffer");
+MODULE_DESCRIPTION("Kernel module to periodically check and read from a buffer");
 
