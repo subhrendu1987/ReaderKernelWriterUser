@@ -9,6 +9,8 @@
 #include <linux/delay.h>
 
 #define BUFFER_SIZE 1024
+static int major_number = 0;
+
 
 static char *buffer;
 static struct task_struct *reader_thread;
@@ -73,10 +75,13 @@ static struct file_operations fops = {
 static int __init reader_module_init(void)
 {
     // Create a character device for reader module
-    if (register_chrdev(0, "reader_module", &fops) < 0)
+     major_number = register_chrdev(0, "reader_module", &fops);
+    if (major_number  < 0)
     {
         printk(KERN_ALERT "Failed to register character device\n");
         return -EFAULT;
+    }else{
+        printk("New device created with Major Number: %d\n",major_number);
     }
 
     // Start the reader thread
