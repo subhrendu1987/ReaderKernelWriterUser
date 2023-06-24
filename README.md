@@ -1,7 +1,5 @@
 # Instructions to build and execute
-This example builds a python user program which writes to a buffer and a LKM which reads from the buffer
-## User program
-
+This example represents a Reader-Writer example between kernel and user process. The given LKM which reads from a buffer. The buffer can be written by an user process.
 ## LKM Reader
 1. Open a terminal.
 2. Navigate to the directory containing the buffer_module.c file.
