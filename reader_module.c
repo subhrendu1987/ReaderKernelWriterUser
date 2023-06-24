@@ -105,6 +105,6 @@ module_init(buffer_module_init);
 module_exit(buffer_module_exit);
 
 MODULE_LICENSE("GPL");
-MODULE_AUTHOR("Your Name");
+MODULE_AUTHOR("Subhrendu Chattopadhyay");
 MODULE_DESCRIPTION("Kernel module for periodically checking and reading from a buffer");
 
