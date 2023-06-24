@@ -10,7 +10,8 @@
 
 
 #define BUFFER_SIZE 1024
-#define MODULE_FILE_NAME "reader_module"
+#define  ""
+static const char *MODULE_FILE_NAME = "reader_module";
 
 static char* buffer;
 static struct kstat stat;
@@ -36,6 +37,17 @@ static int read_buffer(void *data) {
     }
 
     return 0;
+}
+
+static int check_char_dev(filename){
+    // Check if the device is created or not
+    if (vfs_stat(MODULE_FILE_NAME, &stat) == 0) {
+        printk(KERN_INFO "/dev/%s exists\n",MODULE_FILE_NAME);
+        return -1;
+    } else {
+        printk(KERN_INFO "/dev/%s does not exist\n",MODULE_FILE_NAME);
+        return 0;
+    }
 }
 
 ssize_t write_buffer(struct file *file, const char __user *user_buffer, size_t count, loff_t *ppos) {
@@ -88,13 +100,7 @@ static int __init buffer_module_init(void) {
         printk(KERN_ALERT "Failed to create reader thread\n");
         return PTR_ERR(reader_thread);
     }
-    // Check if the device is created or not
-    if (vfs_stat(MODULE_FILE_NAME, &stat) == 0) {
-        printk(KERN_INFO "/dev/%s exists\n",MODULE_FILE_NAME);
-    } else {
-        printk(KERN_INFO "/dev/%s does not exist\n",MODULE_FILE_NAME);
-    }
-
+    
     printk(KERN_INFO "reader module loaded\n");
     return 0;
 }
