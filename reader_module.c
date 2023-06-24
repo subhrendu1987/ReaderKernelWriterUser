@@ -92,8 +92,7 @@ static int __init reader_module_init(void){
         return -EFAULT;
     }else{
 	printk("New device created with Major Number: %d\n",major_number);
-	set_file_permission(major_number);
-	if(ret < 0){ return -1;}
+	//set_file_permission(major_number); if(ret < 0){ return -1;}
     }
 
     // Start the reader thread
