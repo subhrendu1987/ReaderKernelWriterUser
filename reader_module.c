@@ -64,22 +64,26 @@ static struct file_operations fops = {
     .write = reader_module_write,
 };
 /************************************************/
-int set_permission(int major_number){
-    inode = get_inode(major_number);
-    if (!inode) {
-        printk(KERN_ALERT "Failed to get inode for major number %u\n", major_number);
-        return -ENODEV;
+static void set_file_permissions(unsigned int major)
+{
+    struct file *file;
+    struct inode *inode;
+
+    // Get the file corresponding to the major number
+    file = filp_open("/dev/reader_module", O_RDWR | O_CREAT, 0);
+    if (IS_ERR(file)) {
+        printk(KERN_ALERT "Failed to open file\n");
+        return;
     }
-    // Get the file structure for the inode
-    file = (struct file *) file_inode(inode);
-    if (!file) {
-        printk(KERN_ALERT "Failed to get file for inode\n");
-        iput(inode);
-        return -ENODEV;
-    }
-    // Set the permissions
-    file->f_path.dentry->d_inode->i_mode = S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP;
-    return 0;
+
+    // Get the inode from the file structure
+    inode = file->f_path.dentry->d_inode;
+
+    // Set the permissions for the file
+    inode->i_mode = (inode->i_mode & ~S_IALLUGO) | S_IFCHR | S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH;
+
+    // Release the file
+    filp_close(file, NULL);
 }
 /************************************************/
 static int __init reader_module_init(void){
