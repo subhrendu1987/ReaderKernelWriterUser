@@ -68,22 +68,22 @@ static int __init buffer_module_init(void) {
 
     memset(buffer, 0, BUFFER_SIZE);
 
-    ret = register_chrdev(0, "buffer_module", &buffer_fops);
+    ret = register_chrdev(0, "reader_module", &buffer_fops);
     if (ret < 0) {
         kfree(buffer);
-        printk(KERN_ALERT "Failed to register buffer module\n");
+        printk(KERN_ALERT "Failed to register reader module\n");
         return ret;
     }
 
     reader_thread = kthread_run(read_buffer, NULL, "reader_thread");
     if (IS_ERR(reader_thread)) {
-        unregister_chrdev(0, "buffer_module");
+        unregister_chrdev(0, "reader_module");
         kfree(buffer);
         printk(KERN_ALERT "Failed to create reader thread\n");
         return PTR_ERR(reader_thread);
     }
 
-    printk(KERN_INFO "Buffer module loaded\n");
+    printk(KERN_INFO "reader module loaded\n");
     return 0;
 }
 
@@ -92,7 +92,7 @@ static void __exit buffer_module_exit(void) {
         kthread_stop(reader_thread);
     }
 
-    unregister_chrdev(0, "buffer_module");
+    unregister_chrdev(0, "reader_module");
     kfree(buffer);
 
     printk(KERN_INFO "Buffer module unloaded\n");
