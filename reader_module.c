@@ -64,10 +64,8 @@ static struct file_operations fops = {
     .write = reader_module_write,
 };
 /************************************************/
+/*
 static void set_file_permissions(unsigned int major){
-    struct file *file;
-    struct inode *inode;
-
     // Get the file corresponding to the major number
     file = filp_open("/dev/reader_module", O_RDWR | O_CREAT, 0);
     if (IS_ERR(file)) {
@@ -84,6 +82,7 @@ static void set_file_permissions(unsigned int major){
     // Release the file
     filp_close(file, NULL);
 }
+*/
 /************************************************/
 static int __init reader_module_init(void){
     // Create a character device for reader module
