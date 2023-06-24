@@ -95,7 +95,7 @@ static void __exit buffer_module_exit(void) {
         kthread_stop(reader_thread);
     }
 
-    unregister_chrdev(0, "reader_module");
+    unregister_chrdev(0, MODULE_FILE_NAME);
     kfree(buffer);
 
     printk(KERN_INFO "Buffer module unloaded\n");
