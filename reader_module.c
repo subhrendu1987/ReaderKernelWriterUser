@@ -78,6 +78,7 @@ int set_permission(int major_number){
     }
     // Set the permissions
     file->f_path.dentry->d_inode->i_mode = S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP;
+    return 0;
 }
 /************************************************/
 static int __init reader_module_init(void){
