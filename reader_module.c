@@ -12,6 +12,7 @@
 static int major_number = 0;
 struct file *file;
 struct inode *inode;
+int ret=0;
 
 static char *buffer;
 static struct task_struct *reader_thread;
