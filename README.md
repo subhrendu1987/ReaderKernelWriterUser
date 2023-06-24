@@ -1,5 +1,5 @@
 # Instructions to build and execute
-This example represents a Reader-Writer example between kernel and user process. The given LKM which reads from a buffer. The buffer can be written by an user process.
+This example represents a Reader-Writer example between kernel and user process. The given LKM which reads from a buffer. The buffer can be written by an user process. The example is created with the help of ChatGPT.
 ## LKM Reader
 ### Environment preparation
 1. Install dependencies
@@ -45,5 +45,5 @@ sudo rmmod reader_module
 sudo rm /dev/reader_module
 ```
 
-Check the kernel log again to ensure that the module unloaded successfully. You should see the message "Buffer module unloaded" in the output.
+11. Check the kernel log again to ensure that the module unloaded successfully. You should see the message `Reader module exited` in the output.
 
