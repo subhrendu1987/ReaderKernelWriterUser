@@ -115,7 +115,7 @@ static void __exit reader_module_exit(void)
         kfree(buffer);
         buffer = NULL;
     }
-
+    unlink("/dev/reader_module");
     printk(KERN_INFO "Reader module exited\n");
 }
 
