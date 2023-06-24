@@ -39,7 +39,7 @@ static int read_buffer(void *data) {
     return 0;
 }
 
-int check_char_dev(filename){
+int check_char_dev(char* filename){
     // Check if the device is created or not
     if (vfs_stat(filename, &stat) == 0) {
         printk(KERN_INFO "%s exists\n",filename);
