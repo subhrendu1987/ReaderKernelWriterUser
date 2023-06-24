@@ -89,7 +89,7 @@ if (!file) {
 }
 
 // Set the permissions
-file->f_path.dentry->d_inode->i_mode = S
+file->f_path.dentry->d_inode->i_mode = S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP;
 
 }
 
