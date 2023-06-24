@@ -64,8 +64,7 @@ static struct file_operations fops = {
     .write = reader_module_write,
 };
 /************************************************/
-static void set_file_permissions(unsigned int major)
-{
+static void set_file_permissions(unsigned int major){
     struct file *file;
     struct inode *inode;
 
@@ -94,7 +93,7 @@ static int __init reader_module_init(void){
         return -EFAULT;
     }else{
 	printk("New device created with Major Number: %d\n",major_number);
-	ret=set_permission(major_number);
+	set_file_permission(major_number);
 	if(ret < 0){ return -1;}
     }
 
