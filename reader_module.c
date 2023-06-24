@@ -10,7 +10,8 @@
 
 #define BUFFER_SIZE 1024
 static int major_number = 0;
-
+struct file *file;
+struct inode *inode;
 
 static char *buffer;
 static struct task_struct *reader_thread;
@@ -72,6 +73,26 @@ static struct file_operations fops = {
     .write = reader_module_write,
 };
 
+int set_permission(int major_number){
+inode = get_inode(major_number);
+if (!inode) {
+    printk(KERN_ALERT "Failed to get inode for major number %u\n", major_number);
+    return -ENODEV;
+}
+
+// Get the file structure for the inode
+file = file_inode(inode);
+if (!file) {
+    printk(KERN_ALERT "Failed to get file for inode\n");
+    iput(inode);
+    return -ENODEV;
+}
+
+// Set the permissions
+file->f_path.dentry->d_inode->i_mode = S
+
+}
+
 static int __init reader_module_init(void)
 {
     // Create a character device for reader module
@@ -81,7 +102,8 @@ static int __init reader_module_init(void)
         printk(KERN_ALERT "Failed to register character device\n");
         return -EFAULT;
     }else{
-        printk("New device created with Major Number: %d\n",major_number);
+        inode = get_inode(major_number);
+	printk("New device created with Major Number: %d\n",major_number);
     }
 
     // Start the reader thread
