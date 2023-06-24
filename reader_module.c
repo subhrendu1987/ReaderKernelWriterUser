@@ -9,6 +9,7 @@
 #include <linux/mutex.h>
 
 #define BUFFER_SIZE 1024
+#define MODULE_FILE_NAME "reader_module"
 
 static char* buffer;
 DEFINE_MUTEX(buffer_mutex);
@@ -68,16 +69,18 @@ static int __init buffer_module_init(void) {
 
     memset(buffer, 0, BUFFER_SIZE);
 
-    ret = register_chrdev(0, "reader_module", &buffer_fops);
+    ret = register_chrdev(0, MODULE_FILE_NAME, &buffer_fops);
     if (ret < 0) {
         kfree(buffer);
         printk(KERN_ALERT "Failed to register reader module\n");
         return ret;
+    }else{
+        printk(KERN_ALERT "Reader module Created /dev/%s",MODULE_FILE_NAME);
     }
 
     reader_thread = kthread_run(read_buffer, NULL, "reader_thread");
     if (IS_ERR(reader_thread)) {
-        unregister_chrdev(0, "reader_module");
+        unregister_chrdev(0, MODULE_FILE_NAME);
         kfree(buffer);
         printk(KERN_ALERT "Failed to create reader thread\n");
         return PTR_ERR(reader_thread);
