@@ -10,8 +10,8 @@
 
 
 #define BUFFER_SIZE 1024
-#define  ""
 static const char *MODULE_FILE_NAME = "reader_module";
+static const char *MODULE_FILE_LOC = "/dev/reader_module";
 
 static char* buffer;
 static struct kstat stat;
