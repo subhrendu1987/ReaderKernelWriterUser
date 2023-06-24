@@ -90,9 +90,11 @@ static int __init buffer_module_init(void) {
         printk(KERN_ALERT "Failed to register reader module\n");
         return ret;
     }else{
-        MODULE_FILE_LOC
         printk(KERN_ALERT "Reader module Created %s",MODULE_FILE_LOC);
     }
+    ret=check_char_dev(MODULE_FILE_LOC);
+    if(ret <0){ return ret; }
+    
 
     reader_thread = kthread_run(read_buffer, NULL, "reader_thread");
     if (IS_ERR(reader_thread)) {
