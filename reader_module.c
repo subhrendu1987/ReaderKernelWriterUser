@@ -85,6 +85,11 @@ static int __init buffer_module_init(void) {
         printk(KERN_ALERT "Failed to create reader thread\n");
         return PTR_ERR(reader_thread);
     }
+    if (access(MODULE_FILE_NAME, F_OK) == 0) {
+        printk(KERN_INFO "/dev/%s exists\n",MODULE_FILE_NAME);
+    } else {
+        printk(KERN_INFO "/dev/%s does not exist\n",MODULE_FILE_NAME);
+    }
 
     printk(KERN_INFO "reader module loaded\n");
     return 0;
