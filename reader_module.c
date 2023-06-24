@@ -39,13 +39,13 @@ static int read_buffer(void *data) {
     return 0;
 }
 
-static int check_char_dev(filename){
+int check_char_dev(filename){
     // Check if the device is created or not
-    if (vfs_stat(MODULE_FILE_NAME, &stat) == 0) {
-        printk(KERN_INFO "/dev/%s exists\n",MODULE_FILE_NAME);
+    if (vfs_stat(filename, &stat) == 0) {
+        printk(KERN_INFO "%s exists\n",filename);
         return -1;
     } else {
-        printk(KERN_INFO "/dev/%s does not exist\n",MODULE_FILE_NAME);
+        printk(KERN_INFO "%s does not exist\n",filename);
         return 0;
     }
 }
@@ -90,7 +90,8 @@ static int __init buffer_module_init(void) {
         printk(KERN_ALERT "Failed to register reader module\n");
         return ret;
     }else{
-        printk(KERN_ALERT "Reader module Created /dev/%s",MODULE_FILE_NAME);
+        MODULE_FILE_LOC
+        printk(KERN_ALERT "Reader module Created %s",MODULE_FILE_LOC);
     }
 
     reader_thread = kthread_run(read_buffer, NULL, "reader_thread");
