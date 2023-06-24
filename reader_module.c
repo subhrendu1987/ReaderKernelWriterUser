@@ -13,6 +13,8 @@
 #define MODULE_FILE_NAME "reader_module"
 
 static char* buffer;
+static struct kstat stat;
+
 DEFINE_MUTEX(buffer_mutex);
 
 static struct task_struct *reader_thread;
@@ -86,7 +88,7 @@ static int __init buffer_module_init(void) {
         printk(KERN_ALERT "Failed to create reader thread\n");
         return PTR_ERR(reader_thread);
     }
-    struct kstat stat;
+    // Check if the device is created or not
     if (vfs_stat(MODULE_FILE_NAME, &stat) == 0) {
         printk(KERN_INFO "/dev/%s exists\n",MODULE_FILE_NAME);
     } else {
