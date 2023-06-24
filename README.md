@@ -11,7 +11,7 @@ sudo apt-get install build-essential linux-headers-$(uname -r)
 1. Open a terminal.
 2. Navigate to the directory containing the `buffer_module.c` file.
 3. Run the following command to compile the kernel module:
-`make -C /lib/modules/$(uname -r)/build M=$(pwd) modules`
+`make clean; make`
 4. Once the compilation process completes successfully, you will find a file named `buffer_module.ko` in the current directory.
 5. Load the kernel module using the following command:
 `sudo insmod buffer_module.ko`
