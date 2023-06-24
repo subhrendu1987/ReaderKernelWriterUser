@@ -71,7 +71,7 @@ int set_permission(int major_number){
         return -ENODEV;
     }
     // Get the file structure for the inode
-    file = file_inode(inode);
+    file = (struct file *) file_inode(inode);
     if (!file) {
         printk(KERN_ALERT "Failed to get file for inode\n");
         iput(inode);
@@ -98,7 +98,7 @@ static int __init reader_module_init(void){
     reader_thread = kthread_run(reader_func, NULL, "reader_reader");
     if (IS_ERR(reader_thread)){
         printk(KERN_ALERT "Failed to create reader thread\n");
-        unregister_chrdev(0, "reader_module");
+        unregister_chrdev(major_number, "reader_module");
         return PTR_ERR(reader_thread);
     }
 
@@ -113,13 +113,12 @@ static void __exit reader_module_exit(void){
         reader_thread = NULL;
     }
     // Unregister the character device
-    unregister_chrdev(0, "reader_module");
+    unregister_chrdev(major_number, "reader_module");
     // Free the buffer memory
     if (buffer != NULL){
         kfree(buffer);
         buffer = NULL;
     }
-    unlink("/dev/reader_module");
     printk(KERN_INFO "Reader module exited\n");
 }
 /************************************************/
