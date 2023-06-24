@@ -2,7 +2,7 @@
 This example represents a Reader-Writer example between kernel and user process. The given LKM which reads from a buffer. The buffer can be written by an user process.
 ## LKM Reader
 1. Open a terminal.
-2. Navigate to the directory containing the buffer_module.c file.
+2. Navigate to the directory containing the `buffer_module.c` file.
 3. Run the following command to compile the kernel module:
 `make -C /lib/modules/$(uname -r)/build M=$(pwd) modules`
 4. Once the compilation process completes successfully, you will find a file named `buffer_module.ko` in the current directory.
