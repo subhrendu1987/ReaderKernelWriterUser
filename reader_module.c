@@ -15,14 +15,11 @@ struct inode *inode;
 
 static char *buffer;
 static struct task_struct *reader_thread;
-
-static int reader_func(void *data)
-{
-    while (!kthread_should_stop())
-    {
+/************************************************/
+static int reader_func(void *data){
+    while (!kthread_should_stop()){
         // Check if buffer has data
-        if (buffer != NULL)
-        {
+        if (buffer != NULL){
             // Read from buffer
             char local_buffer[BUFFER_SIZE];
             memset(local_buffer, 0, BUFFER_SIZE);
@@ -35,22 +32,17 @@ static int reader_func(void *data)
             kfree(buffer);
             buffer = NULL;
         }
-
         // Sleep for some time before checking the buffer again
         msleep(1000);
     }
-
     return 0;
 }
-
-static ssize_t reader_module_write(struct file *file, const char __user *buffer_user, size_t count, loff_t *ppos)
-{
+/************************************************/
+static ssize_t reader_module_write(struct file *file, const char __user *buffer_user, size_t count, loff_t *ppos){
     // Allocate memory for the buffer
-    if (buffer == NULL)
-    {
+    if (buffer == NULL){
         buffer = kmalloc(BUFFER_SIZE, GFP_KERNEL);
-        if (buffer == NULL)
-        {
+        if (buffer == NULL){
             printk(KERN_ALERT "Failed to allocate memory for buffer\n");
             return -ENOMEM;
         }
@@ -60,45 +52,38 @@ static ssize_t reader_module_write(struct file *file, const char __user *buffer_
     memset(buffer, 0, BUFFER_SIZE);
 
     // Copy the data from user space to kernel space
-    if (copy_from_user(buffer, buffer_user, count) != 0)
-    {
+    if (copy_from_user(buffer, buffer_user, count) != 0){
         printk(KERN_ALERT "Failed to copy data from user space\n");
         return -EFAULT;
     }
-
     return count;
 }
-
+/************************************************/
 static struct file_operations fops = {
     .write = reader_module_write,
 };
 
 int set_permission(int major_number){
-inode = get_inode(major_number);
-if (!inode) {
-    printk(KERN_ALERT "Failed to get inode for major number %u\n", major_number);
-    return -ENODEV;
+    inode = get_inode(major_number);
+    if (!inode) {
+        printk(KERN_ALERT "Failed to get inode for major number %u\n", major_number);
+        return -ENODEV;
+    }
+    // Get the file structure for the inode
+    file = file_inode(inode);
+    if (!file) {
+        printk(KERN_ALERT "Failed to get file for inode\n");
+        iput(inode);
+        return -ENODEV;
+    }
+    // Set the permissions
+    file->f_path.dentry->d_inode->i_mode = S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP;
 }
-
-// Get the file structure for the inode
-file = file_inode(inode);
-if (!file) {
-    printk(KERN_ALERT "Failed to get file for inode\n");
-    iput(inode);
-    return -ENODEV;
-}
-
-// Set the permissions
-file->f_path.dentry->d_inode->i_mode = S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP;
-
-}
-
-static int __init reader_module_init(void)
-{
+/************************************************/
+static int __init reader_module_init(void){
     // Create a character device for reader module
      major_number = register_chrdev(0, "reader_module", &fops);
-    if (major_number  < 0)
-    {
+    if (major_number  < 0){
         printk(KERN_ALERT "Failed to register character device\n");
         return -EFAULT;
     }else{
@@ -108,8 +93,7 @@ static int __init reader_module_init(void)
 
     // Start the reader thread
     reader_thread = kthread_run(reader_func, NULL, "reader_reader");
-    if (IS_ERR(reader_thread))
-    {
+    if (IS_ERR(reader_thread)){
         printk(KERN_ALERT "Failed to create reader thread\n");
         unregister_chrdev(0, "reader_module");
         return PTR_ERR(reader_thread);
@@ -118,29 +102,24 @@ static int __init reader_module_init(void)
     printk(KERN_INFO "Reader module initialized\n");
     return 0;
 }
-
-static void __exit reader_module_exit(void)
-{
+/************************************************/
+static void __exit reader_module_exit(void){
     // Stop the reader thread
-    if (reader_thread != NULL)
-    {
+    if (reader_thread != NULL){
         kthread_stop(reader_thread);
         reader_thread = NULL;
     }
-
     // Unregister the character device
     unregister_chrdev(0, "reader_module");
-
     // Free the buffer memory
-    if (buffer != NULL)
-    {
+    if (buffer != NULL){
         kfree(buffer);
         buffer = NULL;
     }
     unlink("/dev/reader_module");
     printk(KERN_INFO "Reader module exited\n");
 }
-
+/************************************************/
 module_init(reader_module_init);
 module_exit(reader_module_exit);
 
