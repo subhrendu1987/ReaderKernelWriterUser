@@ -8,6 +8,7 @@
 #include <linux/kthread.h>
 #include <linux/mutex.h>
 
+
 #define BUFFER_SIZE 1024
 #define MODULE_FILE_NAME "reader_module"
 
@@ -85,7 +86,8 @@ static int __init buffer_module_init(void) {
         printk(KERN_ALERT "Failed to create reader thread\n");
         return PTR_ERR(reader_thread);
     }
-    if (access(MODULE_FILE_NAME, F_OK) == 0) {
+    struct kstat stat;
+    if (vfs_stat(MODULE_FILE_NAME, &stat) == 0) {
         printk(KERN_INFO "/dev/%s exists\n",MODULE_FILE_NAME);
     } else {
         printk(KERN_INFO "/dev/%s does not exist\n",MODULE_FILE_NAME);
