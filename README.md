@@ -19,10 +19,10 @@ make clean; make
 ```
 sudo insmod reader_module.ko
 ```
-8. Check the kernel log to verify that the module loaded successfully:
+7. Check the kernel log to verify that the module loaded successfully:
 `dmesg`
 You should see the message "Buffer module loaded" in the output.
-6.1 Check and create character device `/dev/reader_module`
+8. Check and create character device `/dev/reader_module`
    * Get major number of the device from `/proc'
    ```
     cat /proc/devices | grep reader_module
