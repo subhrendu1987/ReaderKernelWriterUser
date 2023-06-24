@@ -1,4 +1,4 @@
-obj-m += buffer_module.o
+obj-m += reader_module.o
 
 KDIR := /lib/modules/$(shell uname -r)/build
 PWD := $(shell pwd)
