@@ -4,6 +4,7 @@ This example represents a Reader-Writer example between kernel and user process.
 ```
 ├─Chardev (Use character devices to interact between userspace process and kernel module)
 ├─Sysfs   (Use /sys objects to interact between userspace process and kernel module) (LKM unloading not working properly)
+├─NetLink (Use sockets to interact between userspace process and kernel module
 ```
 
 ### Environment preparation
@@ -74,3 +75,5 @@ You should see the message `Interact LKM initialized` in the output.
 ```
 sudo rmmod reader_module
 ```
+
+## Build module (NetLink) **(Under Development)**

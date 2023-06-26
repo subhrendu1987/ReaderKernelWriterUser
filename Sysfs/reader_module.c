@@ -3,27 +3,29 @@
 #include <linux/sysfs.h>
 #include <linux/kobject.h>
 
+
+struct kobject *interact_kobj;
+/**********************************************************/
 // Function to be called from userspace
 int interact(char* buff) {
     printk(KERN_INFO "User message: %s\n", buff);
     return 0;
 }
-
+/**********************************************************/
 // sysfs entry write handler
 static ssize_t interact_sysfs_write(struct kobject *kobj, struct kobj_attribute *attr,
                                     const char *buf, size_t count) {
     interact(buf);
     return count;
 }
-
+/**********************************************************/
 // sysfs attribute structure
 static struct kobj_attribute interact_attribute =
     __ATTR(interact, 0220, NULL, interact_sysfs_write);
-
+/**********************************************************/
 // Initialize the LKM
 static int __init interact_lkm_init(void) {
     // Create a sysfs directory
-    struct kobject *interact_kobj;
     interact_kobj = kobject_create_and_add("interact", kernel_kobj);
     if (!interact_kobj) {
         printk(KERN_ERR "Failed to create sysfs directory\n");
@@ -41,7 +43,7 @@ static int __init interact_lkm_init(void) {
     printk(KERN_INFO "Interact LKM initialized\n");
     return 0;
 }
-
+/**********************************************************/
 // Cleanup and unload the LKM
 static void __exit interact_lkm_exit(void) {
     // Remove the sysfs attribute
@@ -60,7 +62,7 @@ static void __exit interact_lkm_exit(void) {
 
     printk(KERN_INFO "Interact LKM exited\n");
 }
-
+/**********************************************************/
 
 
 // Specify the LKM initialization and exit functions
