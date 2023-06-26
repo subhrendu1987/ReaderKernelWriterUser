@@ -65,5 +65,5 @@ module_init(interact_lkm_init);
 module_exit(interact_lkm_exit);
 
 MODULE_LICENSE("GPL");
-MODULE_AUTHOR("Your Name");
-MODULE_DESCRIPTION("Interact LKM");
+MODULE_AUTHOR("Subhrendu Chattopadhyay");
+MODULE_DESCRIPTION("Kernel module to interact with a userspace program");
