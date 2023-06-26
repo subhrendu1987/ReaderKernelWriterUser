@@ -1,6 +1,11 @@
 # Instructions to build and execute
 This example represents a Reader-Writer example between kernel and user process. The given LKM which reads from a buffer. The buffer can be written by an user process. The example is created with the help of ChatGPT.
 ## LKM Reader
+```
+├─Chardev (Use character devices to interact between userspace process and kernel module)
+├─Syscall (Use newly created syscall to interact between userspace process and kernel module)
+```
+
 ### Environment preparation
 1. Install dependencies
 ```

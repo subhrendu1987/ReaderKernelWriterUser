@@ -29,8 +29,8 @@ static void __exit reader_module_exit(void){
     printk(KERN_INFO "Interact LKM removed\n");
 }
 /************************************************/
-module_init(interact_init);
-module_exit(interact_exit);
+module_init(reader_module_init);
+module_exit(reader_module_exit);
 
 
 MODULE_LICENSE("GPL");
