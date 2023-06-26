@@ -3,7 +3,7 @@ This example represents a Reader-Writer example between kernel and user process.
 ## LKM Reader
 ```
 ├─Chardev (Use character devices to interact between userspace process and kernel module)
-├─Syscall (Use newly created syscall to interact between userspace process and kernel module) (Not Working So Far)
+├─Sysfs   (Use /sys objects to interact between userspace process and kernel module)
 ```
 
 ### Environment preparation
@@ -57,7 +57,7 @@ sudo rm /dev/reader_module
 2. `cd ReaderKernelWriterUser/Syscall`
 3. Compile the kernel module:
 ```
-make clean; make
+make clean; make; make user
 ```
 5. Once the compilation process completes successfully, you will find a file named `reader_module.ko` in the current directory.
 6. Load the kernel module using the following command:
@@ -67,3 +67,4 @@ sudo insmod reader_module.ko
 7. Check the kernel log to verify that the module loaded successfully:
 `dmesg --follow`
 You should see the message `Interact LKM initialized` in the output.
+8. Use userspace program to talk to the LKM, `sudo ./user`
