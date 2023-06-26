@@ -23,7 +23,8 @@ static void receive_message(struct sk_buff *skb)
     msg = (char *)NLMSG_DATA(nlh);
     msg_size = strlen(msg);
 
-    skb_out = nlmsg_new(NLMSG_DEFAULT_SIZE, 0);
+    //skb_out = nlmsg_new(NLMSG_DEFAULT_SIZE, 0);
+    skb_out = nlmsg_alloc_size(NLMSG_DEFAULT_SIZE);
     if (!skb_out) {
         printk(KERN_ERR "Failed to allocate new skb\n");
         return;
