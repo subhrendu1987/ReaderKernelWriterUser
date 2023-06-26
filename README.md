@@ -65,5 +65,5 @@ make clean; make
 sudo insmod reader_module.ko
 ```
 7. Check the kernel log to verify that the module loaded successfully:
-`dmesg`
-You should see the message "Buffer module loaded" in the output.
+`dmesg --follow`
+You should see the message `Interact LKM initialized` in the output.

@@ -1,4 +1,4 @@
-obj-m += reader_module.o lkm.o
+obj-m += reader_module.o
 
 KDIR := /lib/modules/$(shell uname -r)/build
 PWD := $(shell pwd)
@@ -8,3 +8,6 @@ default:
 
 clean:
 	$(MAKE) -C $(KDIR) M=$(PWD) clean
+	rm user
+user:
+	gcc user_program.c -o user
