@@ -7,10 +7,10 @@ This example represents a Reader-Writer example between kernel and user process.
 sudo apt-get update
 sudo apt-get install build-essential linux-headers-$(uname -r)
 ```
-### Build module
+## Build module (Chardev)
 1. Open a terminal.
-2. Navigate to the directory containing the `reader_module.c` file.
-3. Run the following command to compile the kernel module:
+2. `cd ReaderKernelWriterUser/Chardev`
+3. Compile the kernel module:
 ```
 make clean; make
 ```
@@ -47,3 +47,10 @@ sudo rm /dev/reader_module
 
 11. Check the kernel log again to ensure that the module unloaded successfully. You should see the message `Reader module exited` in the output.
 
+## Build module (Syscall)
+1. Open a terminal.
+2. `cd ReaderKernelWriterUser/Syscall`
+3. Compile the kernel module:
+```
+make clean; make
+```
