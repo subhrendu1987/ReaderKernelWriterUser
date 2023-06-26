@@ -44,6 +44,7 @@ You should see the message `Reader module initialized` in the output.
 sudo echo "Hello, kernel module!" > /dev/reader_module
 ```
 The kernel module will periodically check the buffer and print its contents in the kernel log.
+
 10. To unload the kernel module, run the following command:
 ```
 sudo rmmod reader_module
@@ -52,7 +53,7 @@ sudo rm /dev/reader_module
 
 11. Check the kernel log again to ensure that the module unloaded successfully. You should see the message `Reader module exited` in the output.
 
-## Build module (Syscall)
+## Build module (Syscall) **(LKM unloading not working properly)**
 1. Open a terminal.
 2. `cd ReaderKernelWriterUser/Sysfs`
 3. Compile the kernel module:
