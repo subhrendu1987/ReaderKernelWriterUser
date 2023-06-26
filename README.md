@@ -3,7 +3,7 @@ This example represents a Reader-Writer example between kernel and user process.
 ## LKM Reader
 ```
 ├─Chardev (Use character devices to interact between userspace process and kernel module)
-├─Syscall (Use newly created syscall to interact between userspace process and kernel module)
+├─Syscall (Use newly created syscall to interact between userspace process and kernel module) (Not Working So Far)
 ```
 
 ### Environment preparation
@@ -26,7 +26,7 @@ sudo insmod reader_module.ko
 ```
 7. Check the kernel log to verify that the module loaded successfully:
 `dmesg`
-You should see the message "Buffer module loaded" in the output.
+You should see the message `Reader module initialized` in the output.
 8. Check and create character device `/dev/reader_module`
    * Get major number of the device from `/proc'
    ```
@@ -59,3 +59,11 @@ sudo rm /dev/reader_module
 ```
 make clean; make
 ```
+5. Once the compilation process completes successfully, you will find a file named `reader_module.ko` in the current directory.
+6. Load the kernel module using the following command:
+```
+sudo insmod reader_module.ko
+```
+7. Check the kernel log to verify that the module loaded successfully:
+`dmesg`
+You should see the message "Buffer module loaded" in the output.

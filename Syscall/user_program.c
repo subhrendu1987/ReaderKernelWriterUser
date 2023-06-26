@@ -1,18 +1,29 @@
 #include <stdio.h>
-#include <unistd.h>
-#include <sys/syscall.h>
-
-#define SYS_MY_SYSCALL_NR __NR_my_syscall
-#define BUFFER_SIZE 256
+#include <dlfcn.h>
 
 int main() {
-    char input[BUFFER_SIZE];
+    void (*lkm_function)(void);
 
-    printf("Enter a message to send to the LKM: ");
-    fgets(input, BUFFER_SIZE, stdin);
+    // Load the LKM dynamically
+    void *handle = dlopen("./reader_module.ko", RTLD_NOW);
+    if (!handle) {
+        fprintf(stderr, "Failed to load LKM: %s\n", dlerror());
+        return 1;
+    }
 
-    // Invoke the system call to communicate with the LKM
-    syscall(SYS_MY_SYSCALL_NR, input, sizeof(input));
+    // Resolve the LKM function address
+    lkm_function = dlsym(handle, "my_lkm_function");
+    if (!lkm_function) {
+        fprintf(stderr, "Failed to resolve LKM function: %s\n", dlerror());
+        dlclose(handle);
+        return 1;
+    }
+
+    // Call the LKM function
+    lkm_function();
+
+    // Unload the LKM
+    dlclose(handle);
 
     return 0;
 }
