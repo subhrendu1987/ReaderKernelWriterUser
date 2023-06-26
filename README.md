@@ -3,7 +3,7 @@ This example represents a Reader-Writer example between kernel and user process.
 ## LKM Reader
 ```
 ├─Chardev (Use character devices to interact between userspace process and kernel module)
-├─Sysfs   (Use /sys objects to interact between userspace process and kernel module)
+├─Sysfs   (Use /sys objects to interact between userspace process and kernel module) (LKM unloading not working properly)
 ```
 
 ### Environment preparation

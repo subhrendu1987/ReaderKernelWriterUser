@@ -49,10 +49,13 @@ static void __exit interact_lkm_exit(void) {
     struct kernfs_node *kn = kernel_kobj->sd;
 
     if (kn) {
+        printk(KERN_INFO "Unlink file in /sys\n");
         interact_kobj = kn->parent->priv;
         sysfs_remove_file(interact_kobj, &interact_attribute.attr);
         kobject_put(interact_kobj);
         kernfs_put(kn);
+    }else{
+
     }
 
     printk(KERN_INFO "Interact LKM exited\n");
