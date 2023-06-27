@@ -5,13 +5,19 @@
 #include <linux/socket.h>
 #include <linux/in.h>
 #include <linux/sched.h>
+#include <linux/uaccess.h>
 #include <net/sock.h>
+#include <linux/version.h>
+
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 6, 0)
+    #define MSGHDR_HAS_MSG_IOV_ITER
+#endif
 
 #define SERVER_PORT 12345
 
 static struct socket *conn_socket = NULL;
 
-/*******************************************************/
+/*******************************************************
 static int handle_message(const char *message){
     // Process the received message from the user program
     // You can perform any desired operations or logic here
@@ -27,6 +33,43 @@ static int handle_message(const char *message){
         return bytes_sent;
     }
 
+    return 0;
+}
+/****************************************************/
+static int send_message_to_userspace(const char *message, size_t length){
+    struct msghdr msg;
+    struct kvec iov;
+    mm_segment_t oldfs;
+    int ret;
+
+    iov.iov_base = (void *)message;
+    iov.iov_len = length;
+    memset(&msg, 0, sizeof(struct msghdr));
+    msg.msg_name = NULL;
+    msg.msg_namelen = 0;
+    msg.msg_control = NULL;
+    msg.msg_controllen = 0;
+
+#ifdef MSGHDR_HAS_MSG_IOV_ITER
+    struct iov_iter iter;
+    ssize_t written;
+    iov_iter_kvec(&iter, WRITE, &iov, 1, iov.iov_len);
+    msg.msg_iter = iter;
+#else
+    msg.msg_iov = &iov;
+    msg.msg_iovlen = 1;
+#endif
+
+    //oldfs = get_ds();
+    //set_fs(KERNEL_DS);
+    ret = kernel_sendmsg(conn_socket, &msg, iov.iov_len, NULL, 0);
+    //set_fs(oldfs);
+
+    if (ret < 0) {
+        printk(KERN_ERR "Failed to send message to user program: %d\n", ret);
+        return ret;
+    }
+    printk("Message to user program: %s\n", message);
     return 0;
 }
 /*******************************************************/
@@ -74,6 +117,12 @@ static int __init mymodule_init(void){
     if (ret < 0) {
         printk(KERN_ERR "Failed to connect to userspace program\n");
         return ret;
+    }
+    // Send a test message to the user program
+    const char *message = "Test message from kernel module";
+    ret = send_message_to_userspace(message, strlen(message));
+    if (ret < 0) {
+        printk(KERN_ERR "Failed to send test message to userspace program\n");
     }
 
     printk(KERN_INFO "LKM initialized\n");

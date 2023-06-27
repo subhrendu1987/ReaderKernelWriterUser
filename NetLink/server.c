@@ -53,6 +53,7 @@ int main() {
 
         // Receive message from client
         bytes_received = recv(client_sock, buffer, sizeof(buffer) - 1, 0);
+        printf("Received MSG: %s\n",buffer);
         if (bytes_received < 0) {
             perror("Failed to receive message");
             return EXIT_FAILURE;
@@ -60,6 +61,7 @@ int main() {
         buffer[bytes_received] = '\0';
         printf("Received message from client: %s\n", buffer);
 
+        /*
         // Send response back to client
         const char *response = "Hello from server";
         ssize_t bytes_sent = send(client_sock, response, strlen(response), 0);
@@ -67,6 +69,8 @@ int main() {
             perror("Failed to send response");
             return EXIT_FAILURE;
         }
+        */
+
 
         // Close client socket
         close(client_sock);
