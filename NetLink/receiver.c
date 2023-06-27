@@ -9,10 +9,6 @@
 #include <net/sock.h>
 #include <linux/version.h>
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 6, 0)
-    #define MSGHDR_HAS_MSG_IOV_ITER
-#endif
-
 #define SERVER_PORT 12345
 
 static struct socket *conn_socket = NULL;
@@ -39,7 +35,7 @@ static int handle_message(const char *message){
 static int send_message_to_userspace(const char *message, size_t length){
     struct msghdr msg;
     struct kvec iov;
-    mm_segment_t oldfs;
+    //mm_segment_t oldfs;
     int ret;
 
     iov.iov_base = (void *)message;
@@ -50,26 +46,23 @@ static int send_message_to_userspace(const char *message, size_t length){
     msg.msg_control = NULL;
     msg.msg_controllen = 0;
 
-#ifdef MSGHDR_HAS_MSG_IOV_ITER
     struct iov_iter iter;
-    ssize_t written;
-    iov_iter_kvec(&iter, WRITE, &iov, 1, iov.iov_len);
+    //ssize_t written;
+    //iov_iter_kvec(&iter, WRITE, &iov, 1, iov.iov_len);
+    iov_iter_kvec(&iter, WRITE, &iov, 1, length);
     msg.msg_iter = iter;
-#else
-    msg.msg_iov = &iov;
-    msg.msg_iovlen = 1;
-#endif
 
     //oldfs = get_ds();
     //set_fs(KERNEL_DS);
-    ret = kernel_sendmsg(conn_socket, &msg, iov.iov_len, NULL, 0);
+    ret = kernel_sendmsg(conn_socket, &msg, &iov, NULL, 0);
+    //ret = kernel_sendmsg(conn_socket, &msg, iov.iov_len, NULL, 0);
     //set_fs(oldfs);
 
     if (ret < 0) {
         printk(KERN_ERR "Failed to send message to user program: %d\n", ret);
         return ret;
     }
-    printk("Message to user program: %s\n", message);
+    printk("Message to user program: %s, ret=%d\n", message,ret);
     return 0;
 }
 /*******************************************************/
@@ -119,7 +112,7 @@ static int __init mymodule_init(void){
         return ret;
     }
     // Send a test message to the user program
-    const char *message = "Test message from kernel module";
+    char* message = "Test message from kernel module";
     ret = send_message_to_userspace(message, strlen(message));
     if (ret < 0) {
         printk(KERN_ERR "Failed to send test message to userspace program\n");

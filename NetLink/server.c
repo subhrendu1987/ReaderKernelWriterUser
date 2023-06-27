@@ -53,7 +53,7 @@ int main() {
 
         // Receive message from client
         bytes_received = recv(client_sock, buffer, sizeof(buffer) - 1, 0);
-        printf("Received MSG: %s\n",buffer);
+        printf("Received MSG: %s, Bytes=%d\n",buffer,(int)bytes_received);
         if (bytes_received < 0) {
             perror("Failed to receive message");
             return EXIT_FAILURE;
