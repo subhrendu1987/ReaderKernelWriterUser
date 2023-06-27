@@ -10,7 +10,7 @@ default:
 clean:
 	$(MAKE) -C $(KDIR) M=$(PWD) clean
 user:
-	gcc netlink_user.c -o netlink_user
+	gcc user.c -o user
 help:
 	  @echo "${YELLOW}"
 	  @echo "-----------------------------------------------\n"
@@ -24,7 +24,7 @@ help:
 	  @echo "${YELLOW}"
 	  @echo "Execute userspace process\n"
 	  @echo "${GREEN}"
-	  @echo "  sudo ./send2kernel <Message> # e.g. sudo ./send2kernel \"Hello\"\n"
+	  @echo "  sudo ./user <Message> # e.g. sudo ./user \"Hello\"\n"
 	  @echo "${YELLOW}"
 	  @echo "UNLOAD the LKM using the following command:\n"
 	  @echo "${GREEN}"

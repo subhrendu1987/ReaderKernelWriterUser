@@ -1,72 +1,80 @@
 #include <linux/module.h>
 #include <linux/kernel.h>
 #include <linux/init.h>
-#include <linux/netlink.h>
-#include <linux/skbuff.h>
-#include <linux/string.h>
+#include <linux/net.h>
+#include <linux/socket.h>
+#include <linux/in.h>
+#include <linux/sched.h>
+#include <net/sock.h>
 
-#define NETLINK_USER 31
+#define SERVER_PORT 12345
 
-struct sock *nl_sk = NULL;
+static struct socket *conn_socket = NULL;
 
-static void receive_message(struct sk_buff *skb)
+static int connect_to_userspace(struct net *net)
 {
-    struct nlmsghdr *nlh;
-    int pid;
-    struct sk_buff *skb_out;
-    int msg_size;
-    char *msg;
-    int res;
+    struct sockaddr_in addr;
+    int ret;
 
-    nlh = (struct nlmsghdr *)skb->data;
-    pid = nlh->nlmsg_pid;
-    msg = (char *)NLMSG_DATA(nlh);
-    msg_size = strlen(msg);
-
-    //skb_out = nlmsg_new(NLMSG_DEFAULT_SIZE, 0);
-    skb_out = nlmsg_alloc_size(NLMSG_DEFAULT_SIZE);
-    if (!skb_out) {
-        printk(KERN_ERR "Failed to allocate new skb\n");
-        return;
+    // Create socket
+    ret = sock_create_kern(net, AF_INET, SOCK_STREAM, IPPROTO_TCP, &conn_socket);
+    if (ret < 0) {
+        printk(KERN_ERR "Failed to create socket: %d\n", ret);
+        return ret;
     }
 
-    nlh = nlmsg_put(skb_out, 0, 0, NLMSG_DONE, msg_size, 0);
-    NETLINK_CB(skb_out).dst_group = 0;
-    strncpy(nlmsg_data(nlh), msg, msg_size);
+    // Set up socket address
+    memset(&addr, 0, sizeof(struct sockaddr_in));
+    addr.sin_family = AF_INET;
+    addr.sin_port = htons(SERVER_PORT);
+    addr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
 
-    res = nlmsg_unicast(nl_sk, skb_out, pid);
-    if (res < 0)
-        printk(KERN_INFO "Error while sending message to user\n");
-}
-
-static int __init init_netlink(void)
-{
-    struct netlink_kernel_cfg cfg = {
-        .input = receive_message,
-    };
-
-    nl_sk = netlink_kernel_create(&init_net, NETLINK_USER, &cfg);
-    if (!nl_sk) {
-        printk(KERN_ALERT "Failed to create netlink socket\n");
-        return -ENOMEM;
+    // Connect the socket
+    ret = conn_socket->ops->connect(conn_socket, (struct sockaddr *)&addr,
+                                    sizeof(struct sockaddr_in), O_RDWR);
+    if (ret < 0) {
+        printk(KERN_ERR "Failed to connect to userspace program: %d\n", ret);
+        sock_release(conn_socket);
+        return ret;
     }
 
-    printk(KERN_INFO "Netlink socket created\n");
     return 0;
 }
 
-static void __exit exit_netlink(void)
+static void disconnect_from_userspace(void)
 {
-    if (nl_sk)
-        netlink_kernel_release(nl_sk);
-
-    printk(KERN_INFO "Netlink socket closed\n");
+    if (conn_socket) {
+        sock_release(conn_socket);
+        conn_socket = NULL;
+    }
 }
 
-module_init(init_netlink);
-module_exit(exit_netlink);
+static int __init mymodule_init(void)
+{
+    int ret;
+
+    // Connect to userspace program
+    ret = connect_to_userspace(&init_net);
+    if (ret < 0) {
+        printk(KERN_ERR "Failed to connect to userspace program\n");
+        return ret;
+    }
+
+    printk(KERN_INFO "LKM initialized\n");
+    return 0;
+}
+
+static void __exit mymodule_exit(void)
+{
+    // Disconnect from userspace program
+    disconnect_from_userspace();
+
+    printk(KERN_INFO "LKM exited\n");
+}
+
+module_init(mymodule_init);
+module_exit(mymodule_exit);
 
 MODULE_LICENSE("GPL");
-
-MODULE_AUTHOR("Subhrendu Chattopadhyay");
-MODULE_DESCRIPTION("Kernel module to interact with a userspace program");
+MODULE_AUTHOR("Your Name");
+MODULE_DESCRIPTION("Example LKM for communicating with userspace program via socket");
