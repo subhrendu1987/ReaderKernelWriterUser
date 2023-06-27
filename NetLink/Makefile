@@ -9,8 +9,9 @@ default:
 
 clean:
 	$(MAKE) -C $(KDIR) M=$(PWD) clean
+	rm server
 user:
-	gcc user.c -o user
+	gcc server.c -o server
 help:
 	  @echo "${YELLOW}"
 	  @echo "-----------------------------------------------\n"

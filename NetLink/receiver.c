@@ -11,8 +11,26 @@
 
 static struct socket *conn_socket = NULL;
 
-static int connect_to_userspace(struct net *net)
-{
+/*******************************************************/
+static int handle_message(const char *message){
+    // Process the received message from the user program
+    // You can perform any desired operations or logic here
+
+    // Example: Print the received message in kernel log
+    printk(KERN_INFO "Received message from user program: %s\n", message);
+
+    // Example: Send a response back to the user program
+    const char *response = "Hello from kernel module";
+    ssize_t bytes_sent = conn_socket->ops->sendmsg(conn_socket, &response, 1, strlen(response), NULL, 0);
+    if (bytes_sent < 0) {
+        printk(KERN_ERR "Failed to send response to user program: %zd\n", bytes_sent);
+        return bytes_sent;
+    }
+
+    return 0;
+}
+/*******************************************************/
+static int connect_to_userspace(struct net *net){
     struct sockaddr_in addr;
     int ret;
 
@@ -40,17 +58,15 @@ static int connect_to_userspace(struct net *net)
 
     return 0;
 }
-
-static void disconnect_from_userspace(void)
-{
+/*******************************************************/
+static void disconnect_from_userspace(void){
     if (conn_socket) {
         sock_release(conn_socket);
         conn_socket = NULL;
     }
 }
-
-static int __init mymodule_init(void)
-{
+/*******************************************************/
+static int __init mymodule_init(void){
     int ret;
 
     // Connect to userspace program
@@ -63,15 +79,14 @@ static int __init mymodule_init(void)
     printk(KERN_INFO "LKM initialized\n");
     return 0;
 }
-
-static void __exit mymodule_exit(void)
-{
+/*******************************************************/
+static void __exit mymodule_exit(void){
     // Disconnect from userspace program
     disconnect_from_userspace();
 
     printk(KERN_INFO "LKM exited\n");
 }
-
+/*******************************************************/
 module_init(mymodule_init);
 module_exit(mymodule_exit);
 
