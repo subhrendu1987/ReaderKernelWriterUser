@@ -76,7 +76,7 @@ You should see the message `Interact LKM initialized` in the output.
 sudo rmmod reader_module
 ```
 
-## Build module (NetLink) **(Under Development)**
+## Build module (NetLink) **(Connection established but message sending problem)**
 1. Open a terminal.
 2. `cd ReaderKernelWriterUser/NetLink`
 3. Compile the kernel module:
@@ -84,16 +84,17 @@ sudo rmmod reader_module
 make clean; make
 ```
 4. Use `make help` to see the instructions.
-5. Once the compilation process completes successfully, you will find a file named `receiver.ko` in the current directory.
-6. Load the kernel module using the following command:
+5. Once the compilation process completes successfully, you will find a file named `receiver.ko` and `server` in the current directory.
+6. Run server first with `./server`
+7. Load the kernel module using the following command:
 ```
 sudo insmod receiver.ko
 ```
-7. Check the kernel log to verify that the module loaded successfully:
+8. Check the kernel log to verify that the module loaded successfully:
 `dmesg --follow`
 You should see the message `Interact LKM initialized` in the output.
-8. Use userspace program to talk to the LKM, `sudo ./send2kernel <Message>`
-9. To unload the kernel module, run the following command:
+9. Use userspace program to talk to the LKM, `sudo ./send2kernel <Message>`
+10. To unload the kernel module, run the following command:
 ```
 sudo rmmod receiver
 ```
