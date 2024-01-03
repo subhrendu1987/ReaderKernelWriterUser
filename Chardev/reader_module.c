@@ -7,6 +7,11 @@
 #include <linux/vmalloc.h>
 #include <linux/kthread.h>
 #include <linux/delay.h>
+#include <linux/hashtable.h>
+
+#define MAX_KEY_SIZE 256
+#define MAX_VALUE_SIZE 32
+
 
 #define BUFFER_SIZE 1024
 static int major_number = 0;
@@ -16,6 +21,31 @@ int ret=0;
 
 static char *buffer;
 static struct task_struct *reader_thread;
+struct kv_pair {
+    char key[MAX_KEY_SIZE];
+    char value[MAX_VALUE_SIZE];
+    struct hlist_node node;
+};
+
+DEFINE_HASHTABLE(kvstore, 8);  // Initialize the hash table
+/************************************************/
+int insert_into_kv_store(char* k, char* v){
+    struct kv_pair *pair;
+    char key[MAX_KEY_SIZE] = "my_key";
+    char value[MAX_VALUE_SIZE] = "my_value";
+    pair = kmalloc(sizeof(*pair), GFP_KERNEL);
+    if (!pair)
+        return -ENOMEM;
+
+    strlcpy(pair->key, key, MAX_KEY_SIZE);
+    strlcpy(pair->value, value, MAX_VALUE_SIZE);
+
+    //hash_add(kvstore, &pair->node, hash_str(key));  // Insert the key-value pair into the hash table
+    hash_add(kvstore, &pair->node, hash_string(key, MAX_KEY_SIZE));
+
+    printk(KERN_INFO "Key-value pair inserted into the kvstore\n");
+    return 0;
+}
 /************************************************/
 static int reader_func(void *data){
     while (!kthread_should_stop()){
